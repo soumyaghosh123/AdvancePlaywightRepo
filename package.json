@@ -7,10 +7,17 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "bddgen && playwright test",
     "test:unit": "playwright test -c playwright.unit.config.ts",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "bddgen": "bddgen",
+    "test:web": "bddgen && playwright test --grep-invert @api",
+    "test:api": "bddgen && playwright test --project=api",
+    "test:failed": "bddgen && playwright test --last-failed",
+    "test:debug": "bddgen && playwright test --debug --project=chromium",
+    "codegen": "playwright codegen",
+    "report:open": "playwright show-report reports/playwright"
   },
   "keywords": [],
   "author": "",
