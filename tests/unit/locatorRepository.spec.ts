@@ -50,7 +50,7 @@ test('fallback used and reported', async ({ page }) => {
 
 test('none match lists key and all candidates', async ({ page }) => {
   const repo = new LocatorRepository(map, { fallbackTimeoutMs: 300 });
-  const err = await repo.resolve(page, 'login.ghost').catch((e: Error) => e);
+  const err: unknown = await repo.resolve(page, 'login.ghost').catch((e: unknown) => e);
   expect(err).toBeInstanceOf(LocatorNotFoundError);
   expect((err as Error).message).toMatch(/Locator 'login\.ghost' not found after 300ms[\s\S]*1\. #a[\s\S]*2\. #b/);
 });
