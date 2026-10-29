@@ -1,0 +1,6 @@
+{
+  "username": "placeholder=Username",
+  "password": ["#nope-old-id", "id=password"],
+  "loginBtn": "role=button[name='Log in']",
+  "flash": "#flash"
+}

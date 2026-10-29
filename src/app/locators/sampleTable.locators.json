@@ -1,0 +1,6 @@
+{
+  "rowByName": "xpath=//tr[td[text()='{0}']]",
+  "rows": "css=table tr",
+  "country": "#country",
+  "newTabLink": "a[target=_blank]"
+}
