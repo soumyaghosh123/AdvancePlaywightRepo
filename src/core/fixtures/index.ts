@@ -1,6 +1,7 @@
 import path from 'node:path';
 import type { Logger } from 'pino';
 import { createBdd, test as base } from 'playwright-bdd';
+import { ApiSession } from '../api/ApiSession';
 import { getConfig, getSecret } from '../config/loadConfig';
 import type { FrameworkConfig } from '../config/schema';
 import { TestDataManager } from '../data/TestDataManager';
@@ -29,6 +30,8 @@ export interface TestFixtures {
   consoleErrors: string[];
   /** Generic page actions on locator keys. */
   ui: BasePage;
+  /** REST/SOAP state for the API steps. */
+  api: ApiSession;
 }
 
 export const test = base.extend<TestFixtures, WorkerFixtures>({
@@ -77,6 +80,18 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     void consoleErrors; // start collecting as soon as the scenario touches the UI
     await use(new BasePage(page, locators, cfg));
   },
+  api: async ({ request, cfg, resolve }, use, testInfo) =>
+    use(
+      new ApiSession(
+        request,
+        cfg,
+        resolve,
+        async (name, body) => {
+          await testInfo.attach(name, { body, contentType: 'text/plain' });
+        },
+        cfg.rootDir,
+      ),
+    ),
 });
 
 export const { Given, When, Then, Before, After, BeforeAll, AfterAll } = createBdd(test);
