@@ -1,0 +1,1 @@
+{ "connection": "headless", "browsers": ["chromium"], "workers": 4, "retries": 1 }
