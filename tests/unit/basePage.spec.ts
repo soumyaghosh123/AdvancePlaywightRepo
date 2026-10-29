@@ -31,7 +31,10 @@ function cfg(vars: Record<string, string> = {}): FrameworkConfig {
       trace: 'off',
       video: 'off',
       screenshot: 'off',
+      stepScreenshots: 'off',
       actionTimeoutMs: 5000,
+      pageReadyTimeoutMs: 2000,
+      reports: ['html'],
     },
   };
 }

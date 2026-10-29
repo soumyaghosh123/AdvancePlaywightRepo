@@ -7,7 +7,7 @@ The structure is deliberately the same as the Selenium + Java + Cucumber + TestN
 | `features/<module>/*.feature` | `features/<module>/*.feature`: same Gherkin, same tags |
 | `stepdefination/*StepDef.java` | `src/app/step-definitions/*.steps.ts` |
 | `pageobjects/*.java` | `src/app/pages/*.page.ts` extending `BasePage` |
-| `Locators.properties` | `src/app/locators/<page>.properties` (same `By.*` syntax) or `<page>.locators.json` |
+| `Locators.properties` | `src/app/locators/locators.json`, one section per page (same `By.*` syntax); `<page>.properties` also read while migrating |
 | `env.properties`, `uat/test/dev/*.properties` | `config/env/<env>.env` + `test-data/<env>/*` + `.env` for secrets |
 | `localRun.xml` (browser.connection, browser, testdata, capabilities) | `config/run-profiles/<name>.json` (`connection`, `browsers`, `env`, …) |
 | `-Dbrowsertype=firefox -Denvname=uat` | `BROWSERS=firefox ENV=uat` |
@@ -58,12 +58,12 @@ And I click "login.loginBtn"
 
 ## Reusing a Locators.properties file
 
-Copy the relevant section into `src/app/locators/<page>.properties`. Comments (`//`, `#`), section header lines and `By.xpath("...")` values are read as-is. Then run `npm run locators:check`.
+Each section of your `Locators.properties` becomes a section of `src/app/locators/locators.json`; `By.xpath("...")` values can be pasted as JSON strings. As a stop-gap, a section can also be copied into `src/app/locators/<page>.properties` and is read as-is (comments and section header lines are ignored). Then run `npm run locators:check`.
 
 Two differences to know:
 
-- **Keys include the page name.** `usrName_ausiex` in `login.properties` becomes `login.usrName_ausiex`.
-- **Brand suffixes become separate files or environments.** Instead of `txtDashBoard_westpac` / `txtDashBoard_ausiex`, keep one key per page and split brands by file, or by `ENV` and `config/env` values.
+- **Keys include the page (section) name.** `usrName_ausiex` in the `login` section becomes `login.usrName_ausiex`.
+- **Brand suffixes become separate files or environments.** Instead of `txtDashBoard_westpac` / `txtDashBoard_ausiex`, keep one key per page and split brands by section, or by `ENV` and `config/env` values.
 
 ## Things that work differently
 

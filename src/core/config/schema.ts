@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export const ReportTypes = ['html', 'allure', 'cucumber'] as const;
+
 export const BrowserNames = ['chromium', 'chrome', 'msedge', 'firefox', 'webkit', 'pixel', 'iphone'] as const;
 export type BrowserName = (typeof BrowserNames)[number];
 
@@ -15,7 +17,13 @@ export const RunProfileSchema = z
     trace: z.enum(['off', 'on', 'retain-on-failure', 'on-first-retry']).default('on-first-retry'),
     video: z.enum(['off', 'on', 'retain-on-failure']).default('retain-on-failure'),
     screenshot: z.enum(['off', 'on', 'only-on-failure']).default('only-on-failure'),
+    /** Screenshot attached after every UI step (on), only after a failed step, or never. */
+    stepScreenshots: z.enum(['off', 'on', 'only-on-failure']).default('on'),
     actionTimeoutMs: z.number().int().positive().default(15000),
+    /** Before every action, wait up to this long for the page to finish loading and AJAX to settle (0 = off). */
+    pageReadyTimeoutMs: z.number().int().min(0).default(10000),
+    /** html: Playwright report. allure: Allure results. cucumber: Cucumber HTML + JSON. The console list is always on. */
+    reports: z.array(z.enum(ReportTypes)).default(['html', 'allure', 'cucumber']),
     remoteWsEndpoint: z.string().min(1).optional(),
   })
   .strict()

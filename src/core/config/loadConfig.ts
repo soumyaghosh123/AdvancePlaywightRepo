@@ -31,6 +31,12 @@ function profileOverrides(env: Env): Record<string, unknown> {
   if (env.RETRIES) o.retries = toNumber(env.RETRIES);
   if (env.HEADLESS) o.headless = env.HEADLESS === 'true' ? true : env.HEADLESS === 'false' ? false : env.HEADLESS;
   if (env.CONNECTION) o.connection = env.CONNECTION;
+  if (env.STEP_SCREENSHOTS) o.stepScreenshots = env.STEP_SCREENSHOTS;
+  if (env.REPORTS)
+    o.reports = env.REPORTS.split(',')
+      .map((r) => r.trim())
+      .filter(Boolean);
+  if (env.PAGE_READY_TIMEOUT_MS) o.pageReadyTimeoutMs = toNumber(env.PAGE_READY_TIMEOUT_MS);
   return o;
 }
 

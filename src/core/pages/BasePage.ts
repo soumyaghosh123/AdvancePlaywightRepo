@@ -2,6 +2,8 @@ import type { Locator, Page } from '@playwright/test';
 import type { FrameworkConfig } from '../config/schema';
 import { ConfigError } from '../errors';
 import type { LocatorRepository } from '../locators/LocatorRepository';
+import { CommonUtils } from '../utils/CommonUtils';
+import { WaitUtils } from '../utils/WaitUtils';
 
 /** "sampleLogin" | "sample login" | "sample-login" → "SAMPLE_LOGIN" */
 function pageVarName(name: string): string {
@@ -14,18 +16,29 @@ function pageVarName(name: string): string {
 
 /**
  * Common actions on locator keys ('page.key' or 'page.key(arg)').
- * Extend it for your own page objects; use `this.page` for anything raw Playwright.
+ * Extend it for your own page objects; use `this.common` / `this.wait` for more actions and dynamic waits,
+ * and `this.page` for anything raw Playwright. Every action waits for the page to be ready first.
  */
 export class BasePage {
   private activePage: Page;
   private dialogArmed = false;
+  readonly wait: WaitUtils;
+  readonly common: CommonUtils;
 
   constructor(
     page: Page,
     protected readonly locators: LocatorRepository,
     protected readonly cfg: FrameworkConfig,
+    opts: { onPageNotReady?: (reason: string) => void } = {},
   ) {
     this.activePage = page;
+    const getPage = () => this.activePage;
+    this.wait = new WaitUtils(getPage, locators, {
+      pageReadyTimeoutMs: cfg.profile.pageReadyTimeoutMs,
+      timeoutMs: cfg.profile.actionTimeoutMs,
+      onPageNotReady: opts.onPageNotReady,
+    });
+    this.common = new CommonUtils(getPage, locators, this.wait);
   }
 
   get page(): Page {
@@ -56,58 +69,58 @@ export class BasePage {
       url = value;
     }
     if (url.startsWith('/')) url = this.cfg.baseUrl.replace(/\/$/, '') + url;
-    await this.activePage.goto(url);
+    // Not 'load': a hanging third-party script would block it; actions auto-wait for their elements anyway.
+    await this.activePage.goto(url, { waitUntil: 'domcontentloaded' });
+    await this.wait.waitForPageReady();
   }
 
   async click(ref: string): Promise<void> {
-    await (await this.el(ref)).click();
+    await this.common.click(ref);
   }
 
   async doubleClick(ref: string): Promise<void> {
-    await (await this.el(ref)).dblclick();
+    await this.common.doubleClick(ref);
   }
 
   async hover(ref: string): Promise<void> {
-    await (await this.el(ref)).hover();
+    await this.common.hover(ref);
   }
 
   async fill(ref: string, value: string): Promise<void> {
-    await (await this.el(ref)).fill(value);
+    await this.common.fill(ref, value);
   }
 
   async clear(ref: string): Promise<void> {
-    await (await this.el(ref)).clear();
+    await this.common.clear(ref);
   }
 
   /** Selects by visible label first, then by value. */
   async select(ref: string, valueOrLabel: string): Promise<void> {
-    const el = await this.el(ref);
-    const labels = await el.locator('option').allInnerTexts();
-    await el.selectOption(labels.map((l) => l.trim()).includes(valueOrLabel) ? { label: valueOrLabel } : valueOrLabel);
+    await this.common.select(ref, valueOrLabel);
   }
 
   async check(ref: string): Promise<void> {
-    await (await this.el(ref)).check();
+    await this.common.check(ref);
   }
 
   async uncheck(ref: string): Promise<void> {
-    await (await this.el(ref)).uncheck();
+    await this.common.uncheck(ref);
   }
 
   async press(ref: string, keys: string): Promise<void> {
-    await (await this.el(ref)).press(keys);
+    await this.common.press(ref, keys);
   }
 
   async upload(ref: string, filePath: string): Promise<void> {
-    await (await this.el(ref)).setInputFiles(filePath);
+    await this.common.upload(ref, filePath);
   }
 
   async getText(ref: string): Promise<string> {
-    return (await (await this.el(ref)).innerText()).trim();
+    return this.common.getText(ref);
   }
 
   async isVisible(ref: string): Promise<boolean> {
-    return (await this.el(ref, { allowMissing: true })).isVisible();
+    return this.common.isVisible(ref);
   }
 
   /** Accepts the next alert/confirm/prompt that opens on the active page. */
@@ -122,6 +135,7 @@ export class BasePage {
 
   /** Clicks a link/button that opens a new tab and makes that tab active. */
   async clickAndSwitchToNewTab(ref: string): Promise<Page> {
+    await this.wait.waitForPageReady();
     const el = await this.el(ref);
     const [tab] = await Promise.all([this.activePage.context().waitForEvent('page'), el.click()]);
     await tab.waitForLoadState();

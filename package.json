@@ -18,6 +18,9 @@
     "test:debug": "bddgen && playwright test --debug --project=chromium",
     "codegen": "playwright codegen",
     "report:open": "playwright show-report reports/playwright",
+    "report:allure": "allure open reports/allure-report",
+    "report:allure:generate": "allure generate reports/allure-results --clean",
+    "report:cucumber": "tsx scripts/open-cucumber-report.ts",
     "locators:check": "tsx scripts/locators-check.ts",
     "steps:list": "bddgen export",
     "generate": "plop",
@@ -51,6 +54,8 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
+    "allure": "^3.22.1",
+    "allure-playwright": "^3.14.0",
     "eslint": "^10.13.0",
     "eslint-plugin-playwright": "^2.12.1",
     "gherkin-lint": "^4.2.4",

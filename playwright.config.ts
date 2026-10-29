@@ -7,6 +7,7 @@ import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
 import { getConfig } from './src/core/config/loadConfig';
 import { buildProjects } from './src/core/config/projects';
+import { buildReporters } from './src/core/config/reporters';
 
 const cfg = getConfig();
 
@@ -23,7 +24,8 @@ export default defineConfig({
   workers: cfg.profile.workers,
   retries: cfg.profile.retries,
   outputDir: 'test-results',
-  reporter: [['list'], ['html', { outputFolder: 'reports/playwright', open: 'never' }]],
+  reporter: buildReporters(cfg),
+  globalSetup: './src/core/support/globalSetup.ts',
   use: {
     baseURL: cfg.baseUrl,
     trace: cfg.profile.trace,

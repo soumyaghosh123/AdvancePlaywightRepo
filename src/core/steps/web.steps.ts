@@ -64,12 +64,20 @@ When('I click {string} and switch to the new tab', async ({ ui, resolve }, ref: 
   await ui.clickAndSwitchToNewTab(resolve(ref));
 });
 
-When('I wait for {string} to be visible', async ({ ui, resolve }, ref: string) => {
-  await (await ui.el(resolve(ref))).waitFor({ state: 'visible' });
+When('I wait for {string} to be visible', async ({ wait, resolve }, ref: string) => {
+  await wait.waitForVisible(resolve(ref));
 });
 
-When('I wait for {string} to be hidden', async ({ ui, resolve }, ref: string) => {
-  await (await ui.el(resolve(ref), { allowMissing: true })).waitFor({ state: 'hidden' });
+When('I wait for {string} to be hidden', async ({ wait, resolve }, ref: string) => {
+  await wait.waitForHidden(resolve(ref));
+});
+
+When('I wait for the page to load', async ({ wait }) => {
+  await wait.waitForPageReady();
+});
+
+When('I wait for {string} to contain text {string}', async ({ wait, resolve }, ref: string, text: string) => {
+  await wait.waitForText(resolve(ref), resolve(text));
 });
 
 When('I take a screenshot named {string}', async ({ ui, resolve, $testInfo }, name: string) => {

@@ -1,25 +1,29 @@
 # Locators
 
-Locators live in files under `src/app/locators/`, one file per page, just like `Locators.properties` in the Selenium framework.
-The file name is the page name, and every key is referenced as `page.key`:
+All project locators live in one file, `src/app/locators/locators.json`, with one section (header) per page.
+Every key is referenced as `section.key`:
 
-| File | Key in file | Referenced as |
+| Section in locators.json | Key in section | Referenced as |
 |---|---|---|
-| `login.locators.json` | `username` | `login.username` |
-| `orders.properties` | `submitBtn` | `orders.submitBtn` |
+| `login` | `username` | `login.username` |
+| `orders` | `submitBtn` | `orders.submitBtn` |
 
-Sub-folders are allowed (`src/app/locators/trading/orders.properties`). The page name is still the file name, so keep names unique across folders.
-
-## JSON format (recommended)
+## locators.json
 
 ```json
 {
-  "username": "placeholder=Username",
-  "loginBtn": ["role=button[name='Log in']", "xpath=(//*[@type='submit'])[1]"],
-  "rowByName": "xpath=//tr[td[text()='{0}']]",
-  "frameField": { "candidates": ["#amount"], "frame": "iframe#payment" }
+  "login": {
+    "username": "placeholder=Username",
+    "loginBtn": ["role=button[name='Log in']", "xpath=(//*[@type='submit'])[1]"]
+  },
+  "orders": {
+    "rowByName": "xpath=//tr[td[text()='{0}']]",
+    "frameField": { "candidates": ["#amount"], "frame": "iframe#payment" }
+  }
 }
 ```
+
+`npm run generate` adds a section for a new page. A `section.key` defined twice is an error.
 
 A value can be one of three forms:
 
@@ -27,9 +31,11 @@ A value can be one of three forms:
 - **An array:** fallbacks, tried in order.
 - **An object:** `candidates` (or `value`) plus `frame`, for an element inside an iframe.
 
-## Selenium `.properties` format
+## Migrating from Selenium: `.properties` files
 
-Existing Selenium locator files work as-is:
+Selenium `By.*` values also work inside locators.json, e.g. `"flash": "By.id(\"flash\")"`.
+While migrating, an existing `Locators.properties` file can also be dropped into `src/app/locators/<page>.properties` and used as-is
+(page name = file name; legacy `<page>.locators.json` files are read the same way). Move the entries into locators.json when you can:
 
 ```properties
 # Login page

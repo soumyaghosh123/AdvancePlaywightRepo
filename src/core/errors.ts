@@ -18,6 +18,11 @@ export class LocatorNotFoundError extends Error {
   override name = 'LocatorNotFoundError';
 }
 
+/** A WaitUtils condition did not become true in time. */
+export class TimeoutError extends Error {
+  override name = 'TimeoutError';
+}
+
 /** A ${...} placeholder could not be resolved. */
 export class InterpolationError extends Error {
   override name = 'InterpolationError';

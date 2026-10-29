@@ -18,6 +18,12 @@ Then('{string} should contain text {string}', async ({ ui, resolve }, ref: strin
   await expect(await ui.el(resolve(ref))).toContainText(resolve(text));
 });
 
+/** Regex without slashes, e.g. "^\d+\.\d{2,3}$", tested against the trimmed text (retries until timeout). */
+Then('{string} should match {string}', async ({ ui, resolve }, ref: string, pattern: string) => {
+  const el = await ui.el(resolve(ref));
+  await expect.poll(async () => ((await el.textContent()) ?? '').trim()).toMatch(new RegExp(resolve(pattern)));
+});
+
 Then('{string} should have value {string}', async ({ ui, resolve }, ref: string, value: string) => {
   await expect(await ui.el(resolve(ref))).toHaveValue(resolve(value));
 });

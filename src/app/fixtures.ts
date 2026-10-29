@@ -15,4 +15,4 @@ import { test as coreTest } from '@core/fixtures';
 
 export const test = coreTest;
 
-export const { Given, When, Then, Before, After } = createBdd(test);
+export const { Given, When, Then, Before, After, BeforeStep, AfterStep } = createBdd(test);

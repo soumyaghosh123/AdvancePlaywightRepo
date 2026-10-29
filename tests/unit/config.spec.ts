@@ -35,6 +35,13 @@ test('profile values override env file, process env overrides profile', () => {
   expect(cfg.profile.tags).toBe('@smoke');
 });
 
+test('step screenshots default to on and STEP_SCREENSHOTS overrides them', () => {
+  expect(load().profile.stepScreenshots).toBe('on');
+  expect(load({ STEP_SCREENSHOTS: 'only-on-failure' }).profile.stepScreenshots).toBe('only-on-failure');
+  expect(load({ STEP_SCREENSHOTS: 'off' }).profile.stepScreenshots).toBe('off');
+  expect(() => load({ STEP_SCREENSHOTS: 'sometimes' })).toThrow(/stepScreenshots/);
+});
+
 test('ENV selects env file', () => {
   expect(load({ ENV: 'uat' }).baseUrl).toBe('https://uat.example.invalid');
 });
@@ -99,4 +106,10 @@ test('CRLF and BOM in env files are stripped', () => {
 
 test('getSecret error explains where to set it', () => {
   expect(() => getSecret(load(), 'NOPE')).toThrow('Missing secret NOPE: set it in .env or as a CI parameter');
+});
+
+test('reports default to html, allure and cucumber; REPORTS overrides them', () => {
+  expect(load().profile.reports).toEqual(['html', 'allure', 'cucumber']);
+  expect(load({ REPORTS: 'allure, cucumber' }).profile.reports).toEqual(['allure', 'cucumber']);
+  expect(() => load({ REPORTS: 'pdf' })).toThrow(/reports/);
 });

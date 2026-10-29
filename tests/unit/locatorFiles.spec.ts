@@ -52,9 +52,35 @@ test('page name from file name', () => {
 test('duplicate key across files names both files', () => {
   const dir = tempRoot('', { 'a.locators.json': '{"x":"#x"}', 'sub/a.properties': 'x=#y\n' });
   expect(() => loadLocatorFiles(dir)).toThrow(ConfigError);
-  expect(() => loadLocatorFiles(dir)).toThrow(/a\.locators\.json[\s\S]*a\.properties|a\.properties[\s\S]*a\.locators\.json/);
+  expect(() => loadLocatorFiles(dir)).toThrow(
+    /a\.locators\.json[\s\S]*a\.properties|a\.properties[\s\S]*a\.locators\.json/,
+  );
 });
 
 test('missing directory gives an empty map', () => {
   expect(loadLocatorFiles(tempRoot('') + '/nope')).toEqual({});
+});
+
+test('locators.json: one file, a section per page', () => {
+  const dir = tempRoot('', {
+    'locators.json': JSON.stringify({
+      login: { username: '#user', loginBtn: ['#old', "role=button[name='Log in']"] },
+      quote: { price: { value: 'td.price', frame: 'iframe#q' } },
+    }),
+  });
+  const map = loadLocatorFiles(dir);
+  expect(map['login.username'].candidates).toEqual(['#user']);
+  expect(map['login.loginBtn'].candidates).toHaveLength(2);
+  expect(map['quote.price']).toMatchObject({ candidates: ['td.price'], frame: 'iframe#q' });
+  expect(map['login.username'].source).toMatch(/locators\.json$/);
+});
+
+test('locators.json: a section that is not an object names the section', () => {
+  const dir = tempRoot('', { 'locators.json': JSON.stringify({ login: '#user' }) });
+  expect(() => loadLocatorFiles(dir)).toThrow(/locators\.json.*section 'login'/);
+});
+
+test('locators.json: duplicate with a per-page file is reported', () => {
+  const dir = tempRoot('', { 'locators.json': '{"login":{"x":"#x"}}', 'login.locators.json': '{"x":"#y"}' });
+  expect(() => loadLocatorFiles(dir)).toThrow(/Duplicate locator 'login\.x'/);
 });

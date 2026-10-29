@@ -23,6 +23,16 @@ for (const f of fs.existsSync(path.join(root, 'src/app/locators'))
   : []) {
   if (f.startsWith('sample')) rm(`src/app/locators/${f}`);
 }
+const locatorsFile = path.join(root, 'src/app/locators/locators.json');
+if (fs.existsSync(locatorsFile)) {
+  const sections = JSON.parse(fs.readFileSync(locatorsFile, 'utf8')) as Record<string, unknown>;
+  const samples = Object.keys(sections).filter((page) => page.startsWith('sample'));
+  if (samples.length) {
+    samples.forEach((page) => delete sections[page]);
+    fs.writeFileSync(locatorsFile, `${JSON.stringify(sections, null, 2)}\n`);
+    removed.push(`src/app/locators/locators.json: section(s) ${samples.join(', ')}`);
+  }
+}
 [
   'test-data/test/users.json',
   'templates/json/createUser.json',

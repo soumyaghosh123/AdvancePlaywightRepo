@@ -25,7 +25,10 @@ A run profile, `config/run-profiles/<name>.json`, replaces the TestNG suite XML 
 | `trace` | `off`, `on`, `retain-on-failure`, `on-first-retry` | `on-first-retry` | |
 | `video` | `off`, `on`, `retain-on-failure` | `retain-on-failure` | |
 | `screenshot` | `off`, `on`, `only-on-failure` | `only-on-failure` | |
+| `stepScreenshots` | `on` (after every UI step), `only-on-failure` (only the failed step), `off` | `on` | `STEP_SCREENSHOTS` |
 | `actionTimeoutMs` | timeout for each action and assertion | `15000` | |
+| `pageReadyTimeoutMs` | before every action, wait up to this long for the page to finish loading and AJAX to settle; soft (logs a `page-not-ready` annotation and carries on), at most once per page; `0` = off | `10000` | `PAGE_READY_TIMEOUT_MS` |
+| `reports` | any of `html`, `allure`, `cucumber` (comma-separated in the env var) | `["html", "allure", "cucumber"]` | `REPORTS` |
 | `remoteWsEndpoint` | Playwright server URL, required for `remote` | | |
 
 Bundled profiles: `local` (headed Chromium, for writing tests), `headless`, `crossbrowser` (Chromium + Firefox + WebKit, 4 workers, 1 retry) and `ci`.

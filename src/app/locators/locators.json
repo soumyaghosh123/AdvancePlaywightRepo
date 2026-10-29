@@ -1,0 +1,64 @@
+{
+  "google": {
+    "searchBox": "textarea[name='q']",
+    "luckyButton": "role=button[name=\"I'm Feeling Lucky\"]"
+  },
+  "netwealthLogin": {
+    "username": [
+      "[id$='LoginControl1_txtLogin']",
+      "input.Username"
+    ],
+    "password": [
+      "[id$='LoginControl1_txtPassword']",
+      "input.Password"
+    ],
+    "loginBtn": [
+      "[id$='LoginControl1_btnLogin_implementation_field']",
+      "input[type=submit][value='Login']"
+    ],
+    "logoutLink": "role=link[name='Log out']"
+  },
+  "netwealthQuote": {
+    "menuLink": [
+      "#side-menu a.fly[href*='QuoteSearch.aspx']",
+      "role=link[name='Quotes & Research']"
+    ],
+    "searchBox": "[id$='securitySearch_txtSmartSearch_Input']",
+    "displayBtn": [
+      "[id$='QuoteSearchView1_btnSubmit_implementation_field']",
+      "input[type=submit][value='Display']"
+    ],
+    "securityName": "[id$='ucBuySellBar_lblCodeDescription_field']",
+    "buyBtn": [
+      "[id$='ucBuySellBar_btnBuy_implementation_field']",
+      "input[type=submit][value='Buy']"
+    ],
+    "sellBtn": [
+      "[id$='ucBuySellBar_btnSell_implementation_field']",
+      "input[type=submit][value='Sell']"
+    ],
+    "bidPrice": "table:has(caption:has-text('Share Quote')) tbody tr >> nth=0 >> td >> nth=0",
+    "offerPrice": "table:has(caption:has-text('Share Quote')) tbody tr >> nth=0 >> td >> nth=1",
+    "marketDepth": "table:has(th:has-text('Buyers')):has(th:has-text('Sellers'))"
+  },
+  "sampleLogin": {
+    "username": "placeholder=Username",
+    "password": [
+      "#nope-old-id",
+      "id=password"
+    ],
+    "loginBtn": "role=button[name='Log in']",
+    "flash": "#flash"
+  },
+  "sampleSecure": {
+    "heading": "By.xpath(\"//h2\")",
+    "flash": "By.id(\"flash\")",
+    "logout": "By.linkText(\"Logout\")"
+  },
+  "sampleTable": {
+    "rowByName": "xpath=//tr[td[text()='{0}']]",
+    "rows": "css=table tr",
+    "country": "#country",
+    "newTabLink": "a[target=_blank]"
+  }
+}

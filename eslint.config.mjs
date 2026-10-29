@@ -18,4 +18,6 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   { files: ['tests/**/*.ts'], ...playwright.configs['flat/recommended'] },
   { files: ['src/**/*.ts'], rules: { 'no-restricted-syntax': noSleeps } },
+  // CommonJS files (plopfile.cjs) can only import with require().
+  { files: ['**/*.cjs'], rules: { '@typescript-eslint/no-require-imports': 'off' } },
 );

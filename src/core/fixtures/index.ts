@@ -9,6 +9,8 @@ import { interpolate } from '../data/interpolate';
 import { loadLocatorFiles, type LocatorMap } from '../locators/loadLocatorFiles';
 import { LocatorRepository } from '../locators/LocatorRepository';
 import { BasePage } from '../pages/BasePage';
+import type { CommonUtils } from '../utils/CommonUtils';
+import type { WaitUtils } from '../utils/WaitUtils';
 import { ScenarioContext } from '../support/ScenarioContext';
 import { createLogger } from '../support/logger';
 
@@ -32,6 +34,10 @@ export interface TestFixtures {
   consoleErrors: string[];
   /** Generic page actions on locator keys. */
   ui: BasePage;
+  /** Common actions (click, fill, select, getText, ...); each waits for the page to be ready first. */
+  common: CommonUtils;
+  /** Dynamic waits (page ready, visible, text, URL, response, custom condition, ...). */
+  wait: WaitUtils;
   /** REST/SOAP state for the API steps. */
   api: ApiSession;
 }
@@ -87,10 +93,17 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
     await use(errors);
   },
-  ui: async ({ page, locators, cfg, consoleErrors }, use) => {
+  ui: async ({ page, locators, cfg, consoleErrors }, use, testInfo) => {
     void consoleErrors; // start collecting as soon as the scenario touches the UI
-    await use(new BasePage(page, locators, cfg));
+    await use(
+      new BasePage(page, locators, cfg, {
+        onPageNotReady: (reason) => testInfo.annotations.push({ type: 'page-not-ready', description: reason }),
+      }),
+    );
   },
+  // Same instances as ui uses, so they follow tab switches.
+  common: async ({ ui }, use) => use(ui.common),
+  wait: async ({ ui }, use) => use(ui.wait),
   api: async ({ request, cfg, resolve, secretsUsed }, use, testInfo) =>
     use(
       new ApiSession(
@@ -106,4 +119,4 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     ),
 });
 
-export const { Given, When, Then, Before, After, BeforeAll, AfterAll } = createBdd(test);
+export const { Given, When, Then, Before, After, BeforeAll, AfterAll, BeforeStep, AfterStep } = createBdd(test);
