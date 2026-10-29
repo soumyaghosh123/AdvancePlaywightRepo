@@ -1,0 +1,20 @@
+import type { APIRequestContext } from '@playwright/test';
+import { RestClient } from '@core/api/RestClient';
+import { createAuth } from '@core/api/auth';
+import type { FrameworkConfig } from '@core/index';
+
+/** {{titleCase name}} API. Base URL: API_{{constantCase name}}_URL in config/env/<env>.env. */
+export class {{pascalCase name}}Service {
+  private readonly client: RestClient;
+
+  constructor(request: APIRequestContext, cfg: FrameworkConfig) {
+    this.client = new RestClient(request, {
+      baseUrl: cfg.vars['API_{{constantCase name}}_URL'],
+      auth: createAuth('bearer', '{{camelCase name}}', cfg, request),
+    });
+  }
+
+  get(id: string) {
+    return this.client.send('GET', `/{{kebabCase name}}/${id}`);
+  }
+}

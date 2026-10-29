@@ -1,0 +1,3 @@
+# Framework core is owned by the framework team. Replace @framework-team with your team's handle.
+/src/core/            @framework-team
+/playwright.config.ts @framework-team

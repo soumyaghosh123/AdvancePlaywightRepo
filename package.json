@@ -17,7 +17,13 @@
     "test:failed": "bddgen && playwright test --last-failed",
     "test:debug": "bddgen && playwright test --debug --project=chromium",
     "codegen": "playwright codegen",
-    "report:open": "playwright show-report reports/playwright"
+    "report:open": "playwright show-report reports/playwright",
+    "locators:check": "tsx scripts/locators-check.ts",
+    "steps:list": "bddgen export",
+    "generate": "plop",
+    "lint:gherkin": "gherkin-lint features",
+    "clean:samples": "tsx scripts/clean-samples.ts",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -55,5 +61,14 @@
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.feature": [
+      "gherkin-lint"
+    ]
   }
 }

@@ -1,0 +1,8 @@
+import { BasePage } from '@core/index';
+
+/** {{titleCase name}} page. Locators live in src/app/locators/{{camelCase name}}.locators.json. */
+export class {{pascalCase name}}Page extends BasePage {
+  async exampleAction(): Promise<void> {
+    await this.click('{{camelCase name}}.exampleButton');
+  }
+}

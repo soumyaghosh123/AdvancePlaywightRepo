@@ -1,0 +1,6 @@
+import { When } from '@app/fixtures';
+import { {{pascalCase name}}Page } from '../pages/{{kebabCase name}}.page';
+
+When('I do the {{lowerCase name}} example action', async ({ page, locators, cfg }) => {
+  await new {{pascalCase name}}Page(page, locators, cfg).exampleAction();
+});
