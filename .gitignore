@@ -1,1 +1,8 @@
+node_modules/
+reports/
+test-results/
+.features-gen/
+blob-report/
+playwright/.cache/
+.env
 .superpowers/
