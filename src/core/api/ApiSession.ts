@@ -26,6 +26,8 @@ export class ApiSession {
     private readonly resolve: (t: string) => string,
     private readonly attach: Attach,
     private readonly rootDir: string,
+    /** Values to mask in attachments (secrets resolved during the scenario). */
+    private readonly secrets: () => string[] = () => [],
   ) {}
 
   /** Base URL from API_<NAME>_URL, else API_DEFAULT_URL. */
@@ -33,12 +35,15 @@ export class ApiSession {
     const key = `${apiVarPrefix(apiName)}_URL`;
     const baseUrl = this.cfg.vars[key] ?? this.cfg.vars.API_DEFAULT_URL;
     if (!baseUrl) {
-      throw new ConfigError(`No base URL for API '${apiName}'. Add ${key} or API_DEFAULT_URL to config/env/${this.cfg.env}.env`);
+      throw new ConfigError(
+        `No base URL for API '${apiName}'. Add ${key} or API_DEFAULT_URL to config/env/${this.cfg.env}.env`,
+      );
     }
     this.client = new RestClient(this.request, {
       baseUrl,
       auth: createAuth(auth, apiName, this.cfg, this.request),
       attach: this.attach,
+      secrets: this.secrets,
     });
     for (const [k, v] of Object.entries(this.pendingHeaders)) this.client.setHeader(k, v);
   }
@@ -58,7 +63,9 @@ export class ApiSession {
       try {
         body = JSON.parse(this.resolve(raw));
       } catch (e) {
-        throw new ConfigError(`Request body '${bodyRef}' is not valid JSON after placeholders: ${(e as Error).message}`);
+        throw new ConfigError(
+          `Request body '${bodyRef}' is not valid JSON after placeholders: ${(e as Error).message}`,
+        );
       }
     }
     this.lastRest = await this.client!.send(method, apiPath, body);
@@ -70,7 +77,11 @@ export class ApiSession {
     const url = /^https?:\/\//i.test(urlOrVar) ? urlOrVar : this.cfg.vars[urlOrVar];
     if (!url) throw new ConfigError(`No SOAP URL: add ${urlOrVar} to config/env/${this.cfg.env}.env`);
     const xml = this.resolve(this.readTemplate('soap', templateName));
-    this.lastSoapRes = await new SoapClient(this.request, { attach: this.attach }).send(url, action, xml);
+    this.lastSoapRes = await new SoapClient(this.request, { attach: this.attach, secrets: this.secrets() }).send(
+      url,
+      action,
+      xml,
+    );
     return this.lastSoapRes;
   }
 

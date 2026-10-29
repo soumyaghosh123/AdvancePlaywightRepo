@@ -69,7 +69,7 @@ When('I wait for {string} to be visible', async ({ ui, resolve }, ref: string) =
 });
 
 When('I wait for {string} to be hidden', async ({ ui, resolve }, ref: string) => {
-  await (await ui.el(resolve(ref))).waitFor({ state: 'hidden' });
+  await (await ui.el(resolve(ref), { allowMissing: true })).waitFor({ state: 'hidden' });
 });
 
 When('I take a screenshot named {string}', async ({ ui, resolve, $testInfo }, name: string) => {

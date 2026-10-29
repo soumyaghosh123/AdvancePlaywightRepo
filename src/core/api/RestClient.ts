@@ -39,7 +39,13 @@ export class RestClient {
 
   constructor(
     private readonly request: APIRequestContext,
-    private readonly o: { baseUrl: string; auth?: AuthProvider; attach?: (name: string, body: string) => Promise<void> },
+    private readonly o: {
+      baseUrl: string;
+      auth?: AuthProvider;
+      attach?: (name: string, body: string) => Promise<void>;
+      /** Extra values to mask, e.g. every ${secret.X} the scenario resolved. */
+      secrets?: () => string[];
+    },
   ) {
     this.auth = o.auth ?? noAuth();
   }
@@ -72,6 +78,9 @@ export class RestClient {
 
   private async attach(name: string, payload: unknown): Promise<void> {
     if (!this.o.attach) return;
-    await this.o.attach(name, maskSecrets(JSON.stringify(payload, null, 2), this.auth.secrets()));
+    await this.o.attach(
+      name,
+      maskSecrets(JSON.stringify(payload, null, 2), [...this.auth.secrets(), ...(this.o.secrets?.() ?? [])]),
+    );
   }
 }

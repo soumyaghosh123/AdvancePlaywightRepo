@@ -69,6 +69,17 @@ test('fill, click and getText via locator keys', async ({ page }) => {
   expect(await ui.isVisible('login.out')).toBe(true);
 });
 
+test('isVisible is false for a missing key with fallbacks (no throw)', async ({ page }) => {
+  await page.setContent(FORM);
+  const r = new LocatorRepository(
+    { 'x.gone': { candidates: ['#old', '#new'], source: 'test' } },
+    { fallbackTimeoutMs: 300 },
+  );
+  const ui = new BasePage(page, r, cfg());
+  // eslint-disable-next-line playwright/prefer-web-first-assertions -- this test covers BasePage.isVisible itself
+  expect(await ui.isVisible('x.gone')).toBe(false);
+});
+
 test('select by label then by value, check and uncheck', async ({ page }) => {
   await page.setContent(FORM);
   const ui = new BasePage(page, repo, cfg());

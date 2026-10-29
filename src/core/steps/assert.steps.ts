@@ -7,7 +7,7 @@ Then('{string} should be visible', async ({ ui, resolve }, ref: string) => {
 });
 
 Then('{string} should be hidden', async ({ ui, resolve }, ref: string) => {
-  await expect(await ui.el(resolve(ref))).toBeHidden();
+  await expect(await ui.el(resolve(ref), { allowMissing: true })).toBeHidden();
 });
 
 Then('{string} should have text {string}', async ({ ui, resolve }, ref: string, text: string) => {
@@ -30,7 +30,7 @@ Then(
 );
 
 Then('{string} should have count {int}', async ({ ui, resolve }, ref: string, count: number) => {
-  await expect(await ui.el(resolve(ref))).toHaveCount(count);
+  await expect(await ui.el(resolve(ref), { allowMissing: true })).toHaveCount(count);
 });
 
 Then('{string} should be enabled', async ({ ui, resolve }, ref: string) => {

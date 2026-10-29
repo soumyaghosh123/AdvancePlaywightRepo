@@ -12,7 +12,8 @@ const cfg = getConfig();
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
-  steps: ['src/core/steps/**/*.ts', 'src/core/support/hooks.ts', 'src/app/**/*.ts'],
+  // The core fixtures file must be listed so playwright-bdd can relate app fixtures that extend it.
+  steps: ['src/core/fixtures/index.ts', 'src/core/steps/**/*.ts', 'src/core/support/hooks.ts', 'src/app/**/*.ts'],
   tags: cfg.profile.tags,
 });
 

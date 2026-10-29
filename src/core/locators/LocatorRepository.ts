@@ -33,7 +33,10 @@ function build(root: Page | FrameLocator, raw: string): Locator {
     case 'selector':
       return root.locator(d.selector);
     case 'role':
-      return root.getByRole(d.role as Parameters<Page['getByRole']>[0], d.name === undefined ? {} : { name: d.name, exact: d.exact });
+      return root.getByRole(
+        d.role as Parameters<Page['getByRole']>[0],
+        d.name === undefined ? {} : { name: d.name, exact: d.exact },
+      );
     case 'testid':
       return root.getByTestId(d.value);
     case 'label':
@@ -76,7 +79,7 @@ export class LocatorRepository {
    * One candidate: returned immediately (Playwright auto-waits at the action).
    * Several: waits up to fallbackTimeoutMs for any of them and returns the first that matches.
    */
-  async resolve(page: Page, ref: string): Promise<Locator> {
+  async resolve(page: Page, ref: string, opts: { allowMissing?: boolean } = {}): Promise<Locator> {
     const { key, args } = parseKeyRef(ref);
     const entry = this.get(key);
     const root: Page | FrameLocator = entry.frame ? page.frameLocator(entry.frame) : page;
@@ -85,6 +88,17 @@ export class LocatorRepository {
     if (locators.length === 1) return locators[0];
 
     const any = locators.reduce((acc, l) => acc.or(l));
+    if (opts.allowMissing) {
+      // For negative checks (hidden, count, isVisible): no waiting and no throw. Use whichever candidate matches now,
+      // otherwise the combined locator so web-first assertions keep retrying across all candidates.
+      for (let i = 0; i < locators.length; i++) {
+        if ((await locators[i].count()) > 0) {
+          if (i > 0) this.opts.onFallback?.({ key, usedIndex: i, candidate: raws[i] });
+          return locators[i];
+        }
+      }
+      return any;
+    }
     try {
       await any.first().waitFor({ state: 'attached', timeout: this.fallbackTimeoutMs });
     } catch {

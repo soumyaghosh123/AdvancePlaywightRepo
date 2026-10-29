@@ -37,8 +37,9 @@ export class BasePage {
     this.activePage = page;
   }
 
-  el(ref: string): Promise<Locator> {
-    return this.locators.resolve(this.activePage, ref);
+  /** allowMissing: don't wait for or require the element (for hidden/count/visibility checks on keys with fallbacks). */
+  el(ref: string, opts?: { allowMissing?: boolean }): Promise<Locator> {
+    return this.locators.resolve(this.activePage, ref, opts);
   }
 
   /** URL, '/path' (relative to BASE_URL) or a page name looked up as PAGE_<NAME> in config/env/<env>.env. */
@@ -48,7 +49,9 @@ export class BasePage {
       const key = `PAGE_${pageVarName(target)}`;
       const value = this.cfg.vars[key];
       if (!value) {
-        throw new ConfigError(`No URL for page '${target}'. Add ${key}=<url or /path> to config/env/${this.cfg.env}.env`);
+        throw new ConfigError(
+          `No URL for page '${target}'. Add ${key}=<url or /path> to config/env/${this.cfg.env}.env`,
+        );
       }
       url = value;
     }
@@ -104,7 +107,7 @@ export class BasePage {
   }
 
   async isVisible(ref: string): Promise<boolean> {
-    return (await this.el(ref)).isVisible();
+    return (await this.el(ref, { allowMissing: true })).isVisible();
   }
 
   /** Accepts the next alert/confirm/prompt that opens on the active page. */

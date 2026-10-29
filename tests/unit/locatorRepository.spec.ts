@@ -55,6 +55,16 @@ test('none match lists key and all candidates', async ({ page }) => {
   expect((err as Error).message).toMatch(/Locator 'login\.ghost' not found after 300ms[\s\S]*1\. #a[\s\S]*2\. #b/);
 });
 
+test('allowMissing returns a combined locator without waiting, so negative assertions work', async ({ page }) => {
+  const repo = new LocatorRepository(map, { fallbackTimeoutMs: 5000 });
+  const t = Date.now();
+  const ghost = await repo.resolve(page, 'login.ghost', { allowMissing: true });
+  expect(Date.now() - t).toBeLessThan(50);
+  await expect(ghost).toBeHidden();
+  await expect(ghost).toHaveCount(0);
+  await expect(await repo.resolve(page, 'login.fallback', { allowMissing: true })).toHaveText('Log in');
+});
+
 test('parameterised ref', async ({ page }) => {
   const repo = new LocatorRepository(map);
   await expect(await repo.resolve(page, 'table.rowByName(John)')).toHaveCount(1);

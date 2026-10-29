@@ -20,7 +20,13 @@ test('defaults to local profile and test env', () => {
 });
 
 test('profile values override env file, process env overrides profile', () => {
-  const cfg = load({ PROFILE: 'crossbrowser', BROWSERS: 'firefox,webkit', WORKERS: '6', HEADLESS: 'false', TAGS: '@smoke' });
+  const cfg = load({
+    PROFILE: 'crossbrowser',
+    BROWSERS: 'firefox,webkit',
+    WORKERS: '6',
+    HEADLESS: 'false',
+    TAGS: '@smoke',
+  });
   expect(cfg.profile.connection).toBe('headless');
   expect(cfg.profile.browsers).toEqual(['firefox', 'webkit']);
   expect(cfg.profile.workers).toBe(6);
@@ -38,6 +44,17 @@ test('.env values are loaded and process env wins', () => {
   expect(getSecret(cfg, 'SECRET_A')).toBe('proc');
   expect(getSecret(cfg, 'SECRET_B')).toBe('fromdotenv');
   expect(cfg.vars.SECRET_B).toBe('fromdotenv');
+});
+
+test('.env can set PROFILE and profile overrides; process env still wins', () => {
+  const dotEnv = { '.env': 'PROFILE=crossbrowser\nENV=uat\nBROWSERS=firefox\nWORKERS=2\n' };
+  const fromDotEnv = load({}, dotEnv);
+  expect(fromDotEnv.profileName).toBe('crossbrowser');
+  expect(fromDotEnv.env).toBe('uat');
+  expect(fromDotEnv.profile.browsers).toEqual(['firefox']);
+  expect(fromDotEnv.profile.workers).toBe(2);
+  expect(load({ WORKERS: '7', ENV: 'test' }, dotEnv).profile.workers).toBe(7);
+  expect(load({ WORKERS: '7', ENV: 'test' }, dotEnv).env).toBe('test');
 });
 
 test('values in config/env files are not secrets', () => {

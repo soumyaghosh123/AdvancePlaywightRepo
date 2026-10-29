@@ -22,7 +22,10 @@ function toNumber(value: string): number | string {
 function profileOverrides(env: Env): Record<string, unknown> {
   const o: Record<string, unknown> = {};
   if (env.ENV) o.env = env.ENV;
-  if (env.BROWSERS) o.browsers = env.BROWSERS.split(',').map((b) => b.trim()).filter(Boolean);
+  if (env.BROWSERS)
+    o.browsers = env.BROWSERS.split(',')
+      .map((b) => b.trim())
+      .filter(Boolean);
   if (env.TAGS) o.tags = env.TAGS;
   if (env.WORKERS) o.workers = toNumber(env.WORKERS);
   if (env.RETRIES) o.retries = toNumber(env.RETRIES);
@@ -35,7 +38,13 @@ export function loadConfig(opts: { rootDir?: string; processEnv?: Env } = {}): F
   const rootDir = opts.rootDir ?? process.cwd();
   const processEnv = opts.processEnv ?? process.env;
 
-  const profileName = processEnv.PROFILE || 'local';
+  const dotEnvFile = path.join(rootDir, '.env');
+  // .env first, process env wins: both may set PROFILE and profile overrides, and both are secrets sources.
+  const secrets = {
+    ...(fs.existsSync(dotEnvFile) ? parseEnvFile(dotEnvFile) : {}),
+    ...definedOnly(processEnv),
+  };
+  const profileName = secrets.PROFILE || 'local';
   const profileRel = path.posix.join('config', 'run-profiles', `${profileName}.json`);
   const profileFile = path.join(rootDir, profileRel);
   if (!fs.existsSync(profileFile)) {
@@ -47,7 +56,7 @@ export function loadConfig(opts: { rootDir?: string; processEnv?: Env } = {}): F
   } catch (e) {
     throw new ConfigError(`${profileRel}: invalid JSON: ${(e as Error).message}`);
   }
-  const parsed = RunProfileSchema.safeParse({ ...(raw as object), ...profileOverrides(processEnv) });
+  const parsed = RunProfileSchema.safeParse({ ...(raw as object), ...profileOverrides(secrets) });
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => `${profileRel}: ${i.path.join('.') || '(root)'}: ${i.message}`);
     throw new ConfigError(issues.join('\n'));
@@ -59,11 +68,6 @@ export function loadConfig(opts: { rootDir?: string; processEnv?: Env } = {}): F
   if (!fs.existsSync(envFile)) {
     throw new ConfigError(`Environment file not found: ${envRel} (set ENV or the profile "env")`);
   }
-  const dotEnvFile = path.join(rootDir, '.env');
-  const secrets = {
-    ...(fs.existsSync(dotEnvFile) ? parseEnvFile(dotEnvFile) : {}),
-    ...definedOnly(processEnv),
-  };
   const vars = { ...parseEnvFile(envFile), ...secrets };
   if (!vars.BASE_URL) throw new ConfigError(`Missing required config key BASE_URL in ${envRel}`);
 
